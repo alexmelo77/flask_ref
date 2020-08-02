@@ -1,23 +1,29 @@
 import pytest
-import requests
-import json
+from ast import literal_eval
+
+from fet.app import app
 
 
-def test_hello_get():
-    response = requests.get(
-        'http://localhost:5000/hello_get?myint=1')
+@pytest.fixture
+def client():
+    with app.test_client() as client:
+        yield client
+
+
+def test_hello_get(client):
+    response = client.get('http://localhost:5000/hello_get?myint=1')
+    print(response)
     assert response.status_code == 200
-    d = response.json()
+    d = literal_eval(response.data.decode('utf8'))
     assert d == {'myint': 1}
 
 
-def test_hello_post():
+def test_hello_post(client):
     payload = {'code': 7}
-    response = requests.post(
+    response = client.post(
         'http://localhost:5000/hello_post', data=payload)
     assert response.status_code == 200
-    d = response.json()
+    d = literal_eval(response.data.decode('utf8'))
     assert d == {"code squared": 49}
-
 
 
